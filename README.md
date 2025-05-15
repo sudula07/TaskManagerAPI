@@ -18,18 +18,22 @@
 
 step 1 : 
 Clone the project 
+
 Step 2 : 
 Update Connection String
 "ConnectionStrings": {
   "DefaultConnection": "Server=YOUR_SERVER_NAME;Database=TaskDb;Trusted_Connection=True;TrustServerCertificate=True;"
 }
+
 Step 3 : 
 Apply Migrations & Create Database 
 dotnet ef migrations add InitialCreate
 dotnet ef database update
+
 step 4 : 
 Run the Project
 dotnet run
+
 Step 5: 
 Open SQL Server to check if tables are created 
 Run the following Script to insert data and test the apis
@@ -57,11 +61,13 @@ VALUES
 ('Wrote tests for user service.', 3, 3),
 ('Please increase coverage above 80%.', 3, 1);
 ------------------------------------------------------------
+
 Step 6 : 
 Call the /api/auth/login endpoint with credentials.
 Copy the returned JWT token.
 Use the token in Postman by adding a header:
 Authorization: Bearer <your_token>
+
 Step 7 : 
 📑 API Endpoints
 POST api/Auth/login as GenerateToken in postman 
