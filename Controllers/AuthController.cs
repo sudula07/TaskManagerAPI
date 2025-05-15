@@ -21,21 +21,7 @@ namespace TaskManagerAPI.Controllers
             _config = config;
             _context = context;
         }
-        [HttpPost("register")]
-        public IActionResult Register([FromBody] User user)
-        {
-            if (_context.Users.Any(u => u.Username == user.Username))
-            {
-                return BadRequest("Username already exists.");
-            }
-
-            user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
-
-            _context.Users.Add(user);
-            _context.SaveChanges();
-
-            return Ok("User registered successfully.");
-        }
+       
 
         [HttpPost("login")]
         [AllowAnonymous]
