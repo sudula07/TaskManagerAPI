@@ -27,6 +27,14 @@ Update Connection String
 
 Step 3 : 
 Apply Migrations & Create Database 
+open Developer powershell and run the followig commands 
+dotnet ef migrations add InitialCreate
+dotnet ef database update
+======== or =========
+If already the migration file exists run the following 
+dotnet ef database update
+else 
+Delete the migration file from the solution and re-run the following commands
 dotnet ef migrations add InitialCreate
 dotnet ef database update
 
@@ -74,6 +82,8 @@ POST api/Auth/login as GenerateToken in postman
 GET  api/Tasks/{id} as GetTaskByID  in postman  
 GET api/Tasks/user/{id} as GetTaskByUser in postman 
 POST api/Tasks as CreateTask in Postman 
+
+
 
 
 
