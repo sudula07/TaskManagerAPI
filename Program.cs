@@ -1,136 +1,79 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Text;
 using TaskManagerAPI.Data;
-using Microsoft.OpenApi.Models;
 
+var builder = WebApplication.CreateBuilder(args);
 
-public partial class Program
-{
-    public static void Main(string[] args)
+// Configure services
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddControllers()
+    .AddJsonOptions(x =>
     {
-        var builder = WebApplication.CreateBuilder(args);
+        x.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+        x.JsonSerializerOptions.WriteIndented = true;
+    });
 
-        // Configure services
-        builder.Services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+var jwtSecretKey = builder.Configuration["Jwt:Key"];
 
-        builder.Services.AddControllers()
-            .AddJsonOptions(x =>
-            {
-                x.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
-                x.JsonSerializerOptions.WriteIndented = true;
-            });
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateLifetime = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey))
+        };
+    });
 
-        var jwtSecretKey = builder.Configuration["Jwt:Key"];
+builder.Services.AddEndpointsApiExplorer();
 
-        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
-            {
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    ValidateLifetime = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey))
-                };
-            });
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "TaskManagerAPI",
+        Version = "v1"
+    });
 
-        builder.Services.AddEndpointsApiExplorer();
+    var jwtSecurityScheme = new OpenApiSecurityScheme
+    {
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Description = "Enter only your JWT Bearer token. Example: 'Bearer {your token}'",
 
-        builder.Services.AddSwaggerGen(c =>
-        { 
-            c.SwaggerDoc("v1", new OpenApiInfo
-            {
-                Title = "TaskManagerAPI",
-                Version = "v1"
-            });
+        Reference = new OpenApiReference
+        {
+            Id = "Bearer",
+            Type = ReferenceType.SecurityScheme
+        }
+    };
 
-            var jwtSecurityScheme = new OpenApiSecurityScheme
-            {
-                Scheme = "bearer",
-                BearerFormat = "JWT",
-                Name = "Authorization",
-                In = ParameterLocation.Header,
-                Type = SecuritySchemeType.Http,
-                Description = "Enter only your JWT Bearer token. Example: 'Bearer {your token}'",
+    c.AddSecurityDefinition(jwtSecurityScheme.Reference.Id, jwtSecurityScheme);
 
-                Reference = new OpenApiReference
-                {
-                    Id = "Bearer",
-                    Type = ReferenceType.SecurityScheme
-                }
-            };
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        { jwtSecurityScheme, Array.Empty<string>() }
+    });
+});
 
-            c.AddSecurityDefinition(jwtSecurityScheme.Reference.Id, jwtSecurityScheme);
+var app = builder.Build();
 
-            c.AddSecurityRequirement(new OpenApiSecurityRequirement
-            {
-                { jwtSecurityScheme, Array.Empty<string>() }
-            });
-        });
+app.UseSwagger();
+app.UseSwaggerUI();
 
-        var app = builder.Build();
+app.UseAuthentication();
+app.UseAuthorization();
 
-        app.UseSwagger();
-        app.UseSwaggerUI();
+app.MapControllers();
 
-        app.UseAuthentication();
-        app.UseAuthorization();
-
-        app.MapControllers();
-
-        app.Run();
-    }
-}
-
-
-    //public static void Main(string[] args)
-    //{
-    //    var builder = WebApplication.CreateBuilder(args);
-
-    //    // Other code goes here
-    //    builder.Services.AddDbContext<AppDbContext>(options =>
-    //        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-    //    builder.Services.AddControllers()
-    //     .AddJsonOptions(x =>
-    //     {
-    //         x.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
-    //         x.JsonSerializerOptions.WriteIndented = true;
-    //     });
-
-
-    //    var jwtSecretKey = builder.Configuration["Jwt:Key"];
-
-    //    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    //        .AddJwtBearer(options =>
-    //        {
-    //            options.TokenValidationParameters = new TokenValidationParameters
-    //            {
-    //                ValidateIssuer = false,
-    //                ValidateAudience = false,
-    //                ValidateLifetime = true,
-    //                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey))
-    //            };
-    //        });
-
-
-    //    builder.Services.AddEndpointsApiExplorer();
-    //    builder.Services.AddSwaggerGen();
-
-    //    var app = builder.Build();
-
-    //    app.UseSwagger();
-    //    app.UseSwaggerUI();
-
-    //    app.UseAuthentication();
-    //    app.UseAuthorization();
-
-    //    app.MapControllers();
-
-    //    app.Run();
-    //}
-
-
+app.Run();
