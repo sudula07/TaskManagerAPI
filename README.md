@@ -112,9 +112,13 @@ POST /api/tasks Create a New Task
 2. Database Design Basics
 
 ER diagram file attached 
+
 select * from TaskComments 
+
 select * from Users
+
 Select * from Tasks
+
 =================================
 3. Debugging & Code Fixing
 using System.Collections.Generic;
