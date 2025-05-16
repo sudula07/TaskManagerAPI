@@ -23,8 +23,11 @@ Step 2 :
 Update Connection String
 "ConnectionStrings": {
   "DefaultConnection": "Server=YOUR_SERVER_NAME;Database=TaskDb;Trusted_Connection=True;TrustServerCertificate=True;"
+}  
+OR
+"ConnectionStrings": {
+  "DefaultConnection": "Server=YOUR_SERVER_NAME;Database=YOUR_USER_NAME;User Id=DATABASE_ID;Password=PASSWORD;MultipleActiveResultSets=true;TrustServerCertificate=True;"
 }
-
 Step 3 : 
 Apply Migrations & Create Database 
 open Developer powershell and run the followig commands 
